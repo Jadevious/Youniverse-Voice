@@ -1,5 +1,9 @@
 package uk.youniverse.youniverse_voice.presentation
 
+import android.Manifest
+import android.app.Activity
+import android.content.Context
+import android.content.ContextWrapper
 import android.content.res.Configuration
 import android.speech.tts.Voice
 import androidx.activity.compose.ManagedActivityResultLauncher
@@ -13,8 +17,10 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
@@ -23,6 +29,8 @@ import androidx.compose.ui.tooling.preview.PreviewParameter
 import androidx.compose.ui.tooling.preview.datasource.CollectionPreviewParameterProvider
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.wear.compose.material.Button
@@ -37,22 +45,38 @@ import androidx.wear.compose.material.Vignette
 import androidx.wear.compose.material.VignettePosition
 
 @Composable
-fun VoiceApp() {
-    val viewModel = viewModel<VoiceViewModel>()
-    val voiceState by viewModel.voiceState.collectAsStateWithLifecycle()
+fun VoiceApp(
+    voiceViewModel :VoiceViewModel,
+    enforcePermissionStatus: (String) -> Unit
+) {
+    val voiceState by voiceViewModel.voiceState.collectAsStateWithLifecycle()
 
-    lateinit var permissionLauncher: ManagedActivityResultLauncher<String, Boolean>
+
 
     VoiceUI(
         voiceState,
-        viewModel::controlAction,
-        viewModel::mediaAction,
+        voiceViewModel::controlAction,
+        voiceViewModel::mediaAction,
         Modifier.fillMaxSize()
     )
 }
 
-private class PlaybackStatePreviewProvider : CollectionPreviewParameterProvider<VoiceState>(
+// Taken from WearSpeakerSample (https://github.com/android/wear-os-samples/tree/main)
+private tailrec fun Context.findActivity(): Activity =
+    when (this) {
+        is Activity -> this
+        is ContextWrapper -> baseContext.findActivity()
+        else -> throw IllegalStateException(
+            "findActivity should be called in the context of an Activity"
+        )
+    }
+//
+
+
+// UI Preview
+private class VoicePreviewProvider : CollectionPreviewParameterProvider<VoiceState>(
     listOf(
+        VoiceState.DENIED,
         VoiceState.INACTIVE,
         VoiceState.RECORDING,
         VoiceState.PAUSED,
@@ -69,7 +93,7 @@ private class PlaybackStatePreviewProvider : CollectionPreviewParameterProvider<
 )
 @Composable
 fun VoiceUIPreview(
-    @PreviewParameter(PlaybackStatePreviewProvider::class) voiceState: VoiceState
+    @PreviewParameter(VoicePreviewProvider::class) voiceState: VoiceState
 ) {
     VoiceUI(
         state = voiceState,
