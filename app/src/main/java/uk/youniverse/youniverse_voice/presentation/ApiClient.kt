@@ -11,7 +11,6 @@ import uk.youniverse.youniverse_voice.presentation.interfaces.ApiService
 // Defining the client as an object makes it a singleton,
 // ensures only one request can be active at a time.
 object ApiClient {
-    private const val HEART_URL = "https://youniverse.uk"
 
     // Client state flow
     enum class State {

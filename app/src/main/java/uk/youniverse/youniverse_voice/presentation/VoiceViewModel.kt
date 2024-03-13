@@ -6,6 +6,7 @@ import android.app.Application
 import androidx.annotation.RequiresPermission
 import androidx.lifecycle.AndroidViewModel
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.DEBUG_PROPERTY_VALUE_AUTO
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.coroutineScope
@@ -72,7 +73,7 @@ class VoiceViewModel(application: Application) : AndroidViewModel(application) {
             }
             VoiceState.STORED -> {
                 _voiceState.update { VoiceState.SYNCING }
-                // TODO: Upload and delete the recording
+                uploadRecording()
             }
             else -> {}
         }
@@ -107,21 +108,23 @@ class VoiceViewModel(application: Application) : AndroidViewModel(application) {
     private fun uploadRecording() {
         val file = File(appDirectory, FILE_NAME)
         val requestBody = RequestBody.create("audio/opus".toMediaTypeOrNull(), file)
-        val filePart = MultipartBody.Part.createFormData("", file.name, requestBody)
+        val filePart = MultipartBody.Part.createFormData("AudioFile", file.name, requestBody)
 
         // Make the network request
         val call = ApiClient.apiService.UploadEntry(filePart)
         call.enqueue(object : Callback<ResponseBody> {
             override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
                 if (response.isSuccessful) {
-                    // Handle success
+                    _voiceState.update { VoiceState.INACTIVE }
                 } else {
-                    // Handle failure
+                    _voiceState.update { VoiceState.STORED }
+                    // Failure
                 }
             }
 
             override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
-                // Handle error
+                _voiceState.update { VoiceState.STORED }
+                // Error
             }
         })
     }
