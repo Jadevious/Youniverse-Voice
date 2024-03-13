@@ -56,6 +56,7 @@ fun VoiceUI(
                         VoiceState.PAUSED -> "Paused."
                         VoiceState.RECORDING -> "Listening..."
                         VoiceState.STORED -> "Saved. \nUpload?"
+                        VoiceState.SYNCING -> "Syncing..."
                         VoiceState.DENIED -> "Permission \nRequired"
                         else -> ""
                     },
@@ -68,7 +69,9 @@ fun VoiceUI(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.Center
                 ) {
-                    Button(onClick = toggleActionState) {
+                    Button(
+                        onClick = toggleActionState,
+                        enabled = (state != VoiceState.SYNCING)) {
                         Icon(
                             imageVector = when (state) {
                                 VoiceState.INACTIVE,
@@ -84,7 +87,10 @@ fun VoiceUI(
                     Spacer(modifier = Modifier.width(8.dp))
                     Button(
                         onClick = sync,
-                        enabled = !(state == VoiceState.INACTIVE || state == VoiceState.DENIED),
+                        enabled = !(
+                                state == VoiceState.INACTIVE
+                                || state == VoiceState.DENIED
+                                || state == VoiceState.SYNCING),
                     ) {
                         Icon(
                             imageVector = when (state) {

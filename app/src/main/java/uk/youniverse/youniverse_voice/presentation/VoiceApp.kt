@@ -21,8 +21,6 @@ fun VoiceApp(
 ) {
     val voiceState by voiceViewModel.voiceState.collectAsStateWithLifecycle()
 
-
-
     VoiceUI(
         voiceState,
         voiceViewModel::controlAction,
@@ -50,7 +48,8 @@ private class VoicePreviewProvider : CollectionPreviewParameterProvider<VoiceSta
         VoiceState.INACTIVE,
         VoiceState.RECORDING,
         VoiceState.PAUSED,
-        VoiceState.STORED
+        VoiceState.STORED,
+        VoiceState.SYNCING
     )
 )
 
