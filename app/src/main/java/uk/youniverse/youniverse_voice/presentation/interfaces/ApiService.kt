@@ -8,6 +8,7 @@ import retrofit2.http.POST
 import retrofit2.http.Part
 
 interface ApiService {
+    // Interface tells retrofit what API requests should be possible.
     @Multipart
     @POST("/api/VoiceApi")
     fun UploadEntry(@Part filePart: MultipartBody.Part): Call<ResponseBody>

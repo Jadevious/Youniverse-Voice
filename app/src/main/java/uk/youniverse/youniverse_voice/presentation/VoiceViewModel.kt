@@ -13,12 +13,20 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import okhttp3.MultipartBody
+import okhttp3.RequestBody
+import okhttp3.ResponseBody
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
+import java.io.File
 
-const val FILE_NAME = "CR.opus"
+
 
 class VoiceViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val temp = application.applicationContext.filesDir
+    private val appDirectory = application.applicationContext.filesDir
 
     private val viewModelScope = CoroutineScope(Dispatchers.Main)
 
@@ -92,7 +100,30 @@ class VoiceViewModel(application: Application) : AndroidViewModel(application) {
 
     private fun finishRecording() {
         recordingJob?.cancel()
-        println(temp)
+        // Logging file output for debugging purposes
+        println(appDirectory)
+    }
+
+    private fun uploadRecording() {
+        val file = File(appDirectory, FILE_NAME)
+        val requestBody = RequestBody.create("audio/opus".toMediaTypeOrNull(), file)
+        val filePart = MultipartBody.Part.createFormData("", file.name, requestBody)
+
+        // Make the network request
+        val call = ApiClient.apiService.UploadEntry(filePart)
+        call.enqueue(object : Callback<ResponseBody> {
+            override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
+                if (response.isSuccessful) {
+                    // Handle success
+                } else {
+                    // Handle failure
+                }
+            }
+
+            override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
+                // Handle error
+            }
+        })
     }
 
     @RequiresPermission(Manifest.permission.RECORD_AUDIO)
