@@ -110,7 +110,7 @@ class VoiceViewModel(application: Application) : AndroidViewModel(application) {
         val requestBody = RequestBody.create("audio/opus".toMediaTypeOrNull(), file)
         val filePart = MultipartBody.Part.createFormData("AudioFile", file.name, requestBody)
 
-        // Make the network request
+        // Sending the HTTP Request
         val call = ApiClient.apiService.UploadEntry(filePart)
         call.enqueue(object : Callback<ResponseBody> {
             override fun onResponse(call: Call<ResponseBody>, response: Response<ResponseBody>) {
@@ -118,13 +118,13 @@ class VoiceViewModel(application: Application) : AndroidViewModel(application) {
                     _voiceState.update { VoiceState.INACTIVE }
                 } else {
                     _voiceState.update { VoiceState.STORED }
-                    // Failure
+                    // Currently returns to the Sync page if rejected
                 }
             }
 
             override fun onFailure(call: Call<ResponseBody>, t: Throwable) {
                 _voiceState.update { VoiceState.STORED }
-                // Error
+                // Also returns to the Sync page on failure
             }
         })
     }

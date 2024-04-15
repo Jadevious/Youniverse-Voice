@@ -16,7 +16,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 
 @Composable
 fun VoiceApp(
-    voiceViewModel :VoiceViewModel,
+    voiceViewModel: VoiceViewModel,
     enforcePermissionStatus: (String) -> Unit
 ) {
     val voiceState by voiceViewModel.voiceState.collectAsStateWithLifecycle()
@@ -71,3 +71,27 @@ fun VoiceUIPreview(
         Modifier.fillMaxSize()
     )
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
